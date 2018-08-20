@@ -15,8 +15,9 @@
  */
 
 public void setpointSlider_change1(GCustomSlider source, GEvent event) { //_CODE_:setpointSlider:541758:
-  label18.setText(setpointSlider.getValueS());
-  serialPort.write(setpointSlider.getValueI());
+  //label18.setText(setpointSlider.getValueS());
+  //serialPort.write(setpointSlider.getValueI());
+  setpoint = setpointSlider.getValueI();
   
 } //_CODE_:setpointSlider:541758:
 

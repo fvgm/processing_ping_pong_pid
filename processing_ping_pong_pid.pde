@@ -5,10 +5,11 @@ import processing.serial.*;
 
 
 GPlot plot;
+PIDController pid;
 Serial serialPort;
 String comPort = "COM6";
 
-int rxVal, txVal;
+int input, output, setpoint;
 
 // initialise plot variables
 int i = 0; // variable that changes for point calculation
@@ -23,6 +24,12 @@ public void setup(){
   customGUI();  
   
   serialPort = new Serial(this,comPort,9600); 
+  pid = new PIDController(4,0.1,0,0);
+  pid.setOutputLimits(90,255);
+  pid.setMode(1);
+  
+  delay(2000);
+
 
 }
 
@@ -56,20 +63,29 @@ public void draw(){
  
   } 
   
+  pid.compute();
+  println("input: " + input + " | output: " + output + " | setpoint: " + setpoint);
+  output = (int)pid.getOutput();
+  
+  
+  
   // get new value from serial port
   if ( millis() > previousMillis + duration) { // If data is available,
     // get new valeu
     // Add the point at the end of the array
     i++;
     
-    println("Valor recebido: " + i + "-" + rxVal); 
+    plot.addPoint(i,input);
+    plot.getLayer("setpointLayer").addPoint(i,setpoint);
     
-    plot.addPoint(i,rxVal);
-    plot.getLayer("setpointLayer").addPoint(i,random(30,40));
+
+    
     
     previousMillis = previousMillis + duration;
 
-  } 
+  }
+  
+  
 }
 
 // Use this method to add additional statements
@@ -117,11 +133,14 @@ public void customGUI(){
 }
 
 void serialEvent(Serial serialPort) {
-  rxVal = serialPort.read();  
+  input = serialPort.read();
+  serialPort.write(output);
+
 }
 
 void keyPressed() {
   if (key == ESC) {
+ 
     exit();
   }
 }
