@@ -24,7 +24,7 @@ public void setup(){
   customGUI();  
   
   serialPort = new Serial(this,comPort,9600); 
-  pid = new PIDController(2,0.8,0,0);
+  pid = new PIDController(1.5,0.35,0.9,0);
   pid.setOutputLimits(80,255);
   pid.setMode(1);
   
