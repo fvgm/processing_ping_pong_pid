@@ -15,9 +15,8 @@
  */
 
 public void setpointSlider_change1(GCustomSlider source, GEvent event) { //_CODE_:setpointSlider:541758:
-  //label18.setText(setpointSlider.getValueS());
-  serialPort.write(setpointSlider.getValueI()*2);
   setpoint = setpointSlider.getValueI();
+  
   
 } //_CODE_:setpointSlider:541758:
 
@@ -128,11 +127,23 @@ public void createGUI(){
   button1.setTextBold();
   button1.setLocalColorScheme(GCScheme.CYAN_SCHEME);
   button1.addEventHandler(this, "button1_click1");
-  label18 = new GLabel(this, 20, 90, 80, 20);
-  label18.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
-  label18.setText("My label");
-  label18.setTextItalic();
-  label18.setOpaque(false);
+  spLabel = new GLabel(this, 20, 90, 80, 20);
+  spLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  spLabel.setText("spLabel");
+  spLabel.setTextItalic();
+  spLabel.setOpaque(false);
+  inputLabel = new GLabel(this, 120, 90, 80, 20);
+  inputLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  inputLabel.setText("inputLabel");
+  inputLabel.setOpaque(false);
+  outputLabel = new GLabel(this, 220, 90, 80, 20);
+  outputLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  outputLabel.setText("outputLabel");
+  outputLabel.setOpaque(false);
+  errorLabel = new GLabel(this, 320, 90, 80, 20);
+  errorLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  errorLabel.setText("errorLabel");
+  errorLabel.setOpaque(false);
 }
 
 // Variable declarations 
@@ -155,4 +166,7 @@ GOption option3;
 GOption option4; 
 GLabel label17; 
 GButton button1; 
-GLabel label18; 
+GLabel spLabel; 
+GLabel inputLabel; 
+GLabel outputLabel; 
+GLabel errorLabel; 

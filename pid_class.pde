@@ -6,6 +6,7 @@ class PIDController {
   long lastTime, sampleTime;
   float iTerm, lastInput, outMin, outMax;
   boolean inAuto;
+
   
   // controllerDirection 1 = REVERSE
   //                     0 = DIRECT
@@ -36,8 +37,11 @@ class PIDController {
     
     long now = millis();
     long timeChange = (now - lastTime);
+
   
     if(timeChange >= sampleTime) {  //Compute all the working error variables
+      println("timechange: " + timeChange); // debug
+      
       float error = setpoint - input;
       
       iTerm+= (ki * error);
