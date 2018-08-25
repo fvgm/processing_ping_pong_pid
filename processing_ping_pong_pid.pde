@@ -7,7 +7,7 @@ import processing.serial.*;
 GPlot plotUpper, plotLower;
 PIDController pid;
 Serial serialPort;
-String comPort = "COM7";
+String comPort = "COM6";
 
 int input, output, setpoint;
 
@@ -22,6 +22,8 @@ public void setup(){
   size(1280, 760, JAVA2D);
   
   serialPort = new Serial(this,comPort,9600); 
+  serialPort.clear();
+  
   pid = new PIDController(1,0,0,0);
   pid.setOutputLimits(80,255);
   pid.setMode(1);
@@ -79,7 +81,6 @@ public void draw(){
   
   pid.compute();
   output = (int)pid.getOutput();
- 
   
   
   // get new value from serial port
@@ -103,7 +104,7 @@ public void draw(){
     errorLabel.setText(str(setpoint-input));
     
     previousMillis = previousMillis + duration;
-    
+
 
   }
   
@@ -182,18 +183,15 @@ public void customGUI(){
 void serialEvent(Serial serialPort) {
   input = serialPort.read();
   serialPort.write(output);
-  
-
 }
 
 void keyPressed() {
   if (key == ESC) {
-    serialPort.write(0);
     exit();
   }
 }
 
 void exit() {
-  serialPort.write(0);
+  serialPort.setDTR(true);
   super.exit();
 }
