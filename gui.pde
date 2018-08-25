@@ -55,7 +55,7 @@ public void createGUI(){
   G4P.setGlobalColorScheme(GCScheme.BLUE_SCHEME);
   G4P.setCursor(ARROW);
   surface.setTitle("Sketch Window");
-  setpointSlider = new GCustomSlider(this, 460, 40, 310, 70, "grey_blue");
+  setpointSlider = new GCustomSlider(this, 460, 30, 320, 70, "grey_blue");
   setpointSlider.setShowValue(true);
   setpointSlider.setShowLimits(true);
   setpointSlider.setTextOrientation(G4P.ORIENT_LEFT);
