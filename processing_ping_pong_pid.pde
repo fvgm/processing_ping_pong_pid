@@ -4,7 +4,7 @@ import grafica.*;
 import processing.serial.*;
 
 
-GPlot plot;
+GPlot plotUpper, plotLower;
 PIDController pid;
 Serial serialPort;
 String comPort = "COM7";
@@ -13,24 +13,23 @@ int input, output, setpoint;
 
 // initialise plot variables
 int i = 0; // variable that changes for point calculation
-int points = 250; // number of points to display at a time
-int totalPoints = 300; // number of points on x axis
+int points = 1000; // number of points to display at a time
+int totalPoints = 1000; // number of points on x axis
 long previousMillis = 0;
 int duration = 20;
 
 public void setup(){
   size(1280, 760, JAVA2D);
-  createGUI();
-  customGUI();  
   
   serialPort = new Serial(this,comPort,9600); 
-  pid = new PIDController(1.5,0.35,0.9,0);
+  pid = new PIDController(1,0,0,0);
   pid.setOutputLimits(80,255);
   pid.setMode(1);
   
+  createGUI();
+  customGUI();  
+  
   delay(2000);
-
-
 }
 
 public void draw(){
@@ -39,32 +38,46 @@ public void draw(){
   rect(10,25,380,340);
   
   //draw the plot
-  plot.beginDraw();
-  plot.drawBackground();
-  plot.drawBox();
-  plot.drawXAxis();
-  plot.drawYAxis();
-  plot.drawTopAxis();
-  plot.drawRightAxis();
-  plot.drawTitle();
-  plot.getMainLayer().drawLines();
-  plot.getLayer("setpointLayer").drawLines();
-  plot.drawGridLines(GPlot.VERTICAL);
-  plot.drawGridLines(GPlot.HORIZONTAL);
-  plot.endDraw();
+  plotUpper.beginDraw();
+  plotUpper.drawBackground();
+  plotUpper.drawBox();
+  plotUpper.drawXAxis();
+  plotUpper.drawYAxis();
+  plotUpper.drawTitle();
+  plotUpper.getMainLayer().drawLines();
+  plotUpper.getLayer("setpointLayer").drawLines();
+  plotUpper.drawGridLines(GPlot.VERTICAL);
+  plotUpper.drawGridLines(GPlot.HORIZONTAL);
+  plotUpper.endDraw();
+  
+    //draw the plot2
+  plotLower.beginDraw();
+  plotLower.drawBackground();
+  plotLower.drawBox();
+  plotLower.drawXAxis();
+  plotLower.drawYAxis();
+  plotLower.drawTitle();
+  plotLower.getMainLayer().drawLines();
+  plotLower.drawFilledContours(GPlot.HORIZONTAL, 0);
+  plotLower.drawGridLines(GPlot.VERTICAL);
+  plotLower.drawGridLines(GPlot.HORIZONTAL);
+  plotUpper.endDraw();
   
   // check if i has exceeded the plot size
   if (i > totalPoints){
     
     i=0; // reset to zero if it has
     
-    plot.setPoints(new GPointsArray(points));
-    plot.getLayer("setpointLayer").setPoints(new GPointsArray(points));
+    plotUpper.setPoints(new GPointsArray(points));
+    plotUpper.getLayer("setpointLayer").setPoints(new GPointsArray(points));
+    
+    plotLower.setPoints(new GPointsArray(points));
+    
+    println(millis());
  
   } 
   
   pid.compute();
-  //println("input: " + input + " | output: " + output + " | setpoint: " + setpoint);
   output = (int)pid.getOutput();
  
   
@@ -75,13 +88,22 @@ public void draw(){
     // Add the point at the end of the array
     i++;
     
-    plot.addPoint(i,input);
-    plot.getLayer("setpointLayer").addPoint(i,setpoint);
-    
 
+ 
     
+    plotUpper.addPoint(i,input);
+    plotUpper.getLayer("setpointLayer").addPoint(i,setpoint);
+    
+    
+    plotLower.addPoint(i, output);
+    
+    spLabel.setText(setpointSlider.getValueS());
+    inputLabel.setText(str(input)); // str() converte em String
+    outputLabel.setText(str(output));
+    errorLabel.setText(str(setpoint-input));
     
     previousMillis = previousMillis + duration;
+    
 
   }
   
@@ -92,43 +114,68 @@ public void draw(){
 // to customise the GUI controls
 public void customGUI(){
   
+  kpTextfield.setText(str(pid.getKp()));
+  kiTextfield.setText(str(pid.getKi()));
+  kdTextfield.setText(str(pid.getKd()));
   
+
 
     // Place your setup code here
     
   GPointsArray pointsArray = new GPointsArray(points);
   GPointsArray points2 = new GPointsArray(points);
-
-  // //calculate initial display points
-  //for (i = 0; i < points; i++) {
-  //  pointsArray.add(i,0);
-  //}
   
-  // Create the plot
-  plot = new GPlot(this);
-  plot.setPos(420, 0); // set the position of to left corner of plot
-  plot.setDim(750, 300); // set plot size
-
+  GPointsArray pointsOutput = new GPointsArray(points);
   
-  plot.getXAxis().setNTicks(10);
+
+  // Cria o gráfico superior
+  plotUpper = new GPlot(this);
+  plotUpper.setPos(420, 0); // set the position of to left corner of plot
+  plotUpper.setDim(750, 300); // set plot size
+  
+  plotUpper.getXAxis().setNTicks(20);
   
   // Set the plot limits (this will fix them)
-  plot.setXLim(0, totalPoints); // set x limits
-  plot.setYLim(0, 100); // set y limits
+  plotUpper.setXLim(0, totalPoints); // set x limits
+  plotUpper.setYLim(0, 100); // set y limits
   
   // Set the plot title and the axis labels
-  plot.setTitleText("Distance Sensor Example"); // set plot title
-  plot.getXAxis().setAxisLabelText("x axis"); // set x axis label
-  plot.getYAxis().setAxisLabelText("Distance"); // set y axis label
+  plotUpper.setTitleText("Altura vs. Tempo"); // set plot title
+  //plotUpper.getXAxis().setAxisLabelText("x axis"); // set x axis label
+  plotUpper.getYAxis().setAxisLabelText("Distancia (mm)"); // set y axis label
   
   // Add the set of points to the plot 
-  plot.setPoints(pointsArray);
-  plot.addLayer("setpointLayer",points2);
+  plotUpper.setPoints(pointsArray);
+  plotUpper.addLayer("setpointLayer",points2);
+  
+  // configura a layer padrao
+  plotUpper.setLineWidth(2);
+  
+  // configura a layer setpoint
+  plotUpper.getLayer("setpointLayer").setLineColor(color(255, 0, 0)); 
+  plotUpper.getLayer("setpointLayer").setLineWidth(2);
+
+  
+// Cria o gráfico inferior
+  plotLower = new GPlot(this);
+  plotLower.setPos(420, 400); // set the position of to left corner of plot
+  plotLower.setDim(750, 150); // set plot size
+
+  plotLower.getXAxis().setNTicks(20);
+  
+  // Set the plot limits (this will fix them)
+  plotLower.setXLim(0, totalPoints); // set x limits
+  plotLower.setYLim(0, 255); // set y limits
+  
+  plotLower.getXAxis().setAxisLabelText("x axis"); // set x axis label
+  
+ 
+  // Add the set of points to the plot 
+  plotLower.setPoints(pointsOutput);
   
   // troca a cor da layer
-  plot.getLayer("setpointLayer").setLineColor(color(255, 0, 0)); 
-  
-
+  plotLower.setLineColor(color(100,188,57));
+ 
   
 }
 
@@ -141,7 +188,7 @@ void serialEvent(Serial serialPort) {
 
 void keyPressed() {
   if (key == ESC) {
- 
+    serialPort.write(0);
     exit();
   }
 }

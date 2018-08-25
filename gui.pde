@@ -20,17 +20,17 @@ public void setpointSlider_change1(GCustomSlider source, GEvent event) { //_CODE
   
 } //_CODE_:setpointSlider:541758:
 
-public void textfield1_change1(GTextField source, GEvent event) { //_CODE_:textfield1:369426:
+public void kpTextfield_change(GTextField source, GEvent event) { //_CODE_:kpTextfield:369426:
   println("textfield1 - GTextField >> GEvent." + event + " @ " + millis());
-} //_CODE_:textfield1:369426:
+} //_CODE_:kpTextfield:369426:
 
-public void textfield2_change1(GTextField source, GEvent event) { //_CODE_:textfield2:870370:
+public void kiTextfield_change(GTextField source, GEvent event) { //_CODE_:kiTextfield:870370:
   println("textfield2 - GTextField >> GEvent." + event + " @ " + millis());
-} //_CODE_:textfield2:870370:
+} //_CODE_:kiTextfield:870370:
 
-public void textfield3_change1(GTextField source, GEvent event) { //_CODE_:textfield3:979035:
+public void kdTextfield_change(GTextField source, GEvent event) { //_CODE_:kdTextfield:979035:
   println("textfield3 - GTextField >> GEvent." + event + " @ " + millis());
-} //_CODE_:textfield3:979035:
+} //_CODE_:kdTextfield:979035:
 
 public void option3_clicked1(GOption source, GEvent event) { //_CODE_:option3:556855:
   println("option3 - GOption >> GEvent." + event + " @ " + millis());
@@ -40,9 +40,11 @@ public void option4_clicked1(GOption source, GEvent event) { //_CODE_:option4:70
   println("option4 - GOption >> GEvent." + event + " @ " + millis());
 } //_CODE_:option4:705268:
 
-public void button1_click1(GButton source, GEvent event) { //_CODE_:button1:434548:
-  println("button1 - GButton >> GEvent." + event + " @ " + millis());
-} //_CODE_:button1:434548:
+public void updateButton_click(GButton source, GEvent event) { //_CODE_:updateButton:434548:
+  pid.setTunings( float(kpTextfield.getText()),
+                  float(kiTextfield.getText()),
+                  float(kdTextfield.getText()) );
+} //_CODE_:updateButton:434548:
 
 
 
@@ -92,18 +94,18 @@ public void createGUI(){
   label16 = new GLabel(this, 290, 210, 80, 20);
   label16.setText("Kd");
   label16.setOpaque(false);
-  textfield1 = new GTextField(this, 20, 240, 80, 30, G4P.SCROLLBARS_NONE);
-  textfield1.setLocalColorScheme(GCScheme.CYAN_SCHEME);
-  textfield1.setOpaque(true);
-  textfield1.addEventHandler(this, "textfield1_change1");
-  textfield2 = new GTextField(this, 160, 240, 80, 30, G4P.SCROLLBARS_NONE);
-  textfield2.setLocalColorScheme(GCScheme.CYAN_SCHEME);
-  textfield2.setOpaque(true);
-  textfield2.addEventHandler(this, "textfield2_change1");
-  textfield3 = new GTextField(this, 290, 240, 80, 30, G4P.SCROLLBARS_NONE);
-  textfield3.setLocalColorScheme(GCScheme.CYAN_SCHEME);
-  textfield3.setOpaque(true);
-  textfield3.addEventHandler(this, "textfield3_change1");
+  kpTextfield = new GTextField(this, 20, 240, 80, 30, G4P.SCROLLBARS_NONE);
+  kpTextfield.setLocalColorScheme(GCScheme.CYAN_SCHEME);
+  kpTextfield.setOpaque(true);
+  kpTextfield.addEventHandler(this, "kpTextfield_change");
+  kiTextfield = new GTextField(this, 160, 240, 80, 30, G4P.SCROLLBARS_NONE);
+  kiTextfield.setLocalColorScheme(GCScheme.CYAN_SCHEME);
+  kiTextfield.setOpaque(true);
+  kiTextfield.addEventHandler(this, "kiTextfield_change");
+  kdTextfield = new GTextField(this, 290, 240, 80, 30, G4P.SCROLLBARS_NONE);
+  kdTextfield.setLocalColorScheme(GCScheme.CYAN_SCHEME);
+  kdTextfield.setOpaque(true);
+  kdTextfield.addEventHandler(this, "kdTextfield_change");
   togGroup1 = new GToggleGroup();
   option3 = new GOption(this, 20, 310, 120, 20);
   option3.setIconAlign(GAlign.LEFT, GAlign.MIDDLE);
@@ -122,11 +124,11 @@ public void createGUI(){
   label17.setText("Modo de Operação");
   label17.setTextBold();
   label17.setOpaque(false);
-  button1 = new GButton(this, 290, 320, 80, 30);
-  button1.setText("Atualizar");
-  button1.setTextBold();
-  button1.setLocalColorScheme(GCScheme.CYAN_SCHEME);
-  button1.addEventHandler(this, "button1_click1");
+  updateButton = new GButton(this, 290, 320, 80, 30);
+  updateButton.setText("Atualizar");
+  updateButton.setTextBold();
+  updateButton.setLocalColorScheme(GCScheme.CYAN_SCHEME);
+  updateButton.addEventHandler(this, "updateButton_click");
   spLabel = new GLabel(this, 20, 90, 80, 20);
   spLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   spLabel.setText("spLabel");
@@ -158,14 +160,14 @@ GLabel label13;
 GLabel label14; 
 GLabel label15; 
 GLabel label16; 
-GTextField textfield1; 
-GTextField textfield2; 
-GTextField textfield3; 
+GTextField kpTextfield; 
+GTextField kiTextfield; 
+GTextField kdTextfield; 
 GToggleGroup togGroup1; 
 GOption option3; 
 GOption option4; 
 GLabel label17; 
-GButton button1; 
+GButton updateButton; 
 GLabel spLabel; 
 GLabel inputLabel; 
 GLabel outputLabel; 

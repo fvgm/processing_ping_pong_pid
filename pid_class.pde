@@ -40,7 +40,6 @@ class PIDController {
 
   
     if(timeChange >= sampleTime) {  //Compute all the working error variables
-      println("timechange: " + timeChange); // debug
       
       float error = setpoint - input;
       
