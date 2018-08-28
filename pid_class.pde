@@ -42,6 +42,8 @@ class PIDController {
     if(timeChange >= sampleTime) {  //Compute all the working error variables
       
       float error = setpoint - input;
+      float dInput = (input - lastInput);
+      
       
       iTerm+= (ki * error);
       
@@ -51,7 +53,7 @@ class PIDController {
         iTerm= outMin;
       }
       
-      float dInput = (input - lastInput);
+     
       
       /*Compute PID Output*/
       float output = kp * error + iTerm- kd * dInput;

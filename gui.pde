@@ -17,7 +17,6 @@
 public void setpointSlider_change1(GCustomSlider source, GEvent event) { //_CODE_:setpointSlider:541758:
   setpoint = setpointSlider.getValueI();
   
-  
 } //_CODE_:setpointSlider:541758:
 
 public void kpTextfield_change(GTextField source, GEvent event) { //_CODE_:kpTextfield:369426:
@@ -32,19 +31,34 @@ public void kdTextfield_change(GTextField source, GEvent event) { //_CODE_:kdTex
   println("textfield3 - GTextField >> GEvent." + event + " @ " + millis());
 } //_CODE_:kdTextfield:979035:
 
-public void option3_clicked1(GOption source, GEvent event) { //_CODE_:option3:556855:
-  println("option3 - GOption >> GEvent." + event + " @ " + millis());
-} //_CODE_:option3:556855:
+public void auto_option_clicked(GOption source, GEvent event) { //_CODE_:auto_option:556855:
+  println("Modo automático selecionado.");
+  isAutomaticMode = true;
+  pid.setMode(1); // modo manual
+  plotLower.setLineColor(color(100,188,57));
+  manual_slider.setEnabled(false);
+  manual_slider.setAlpha(30);
+} //_CODE_:auto_option:556855:
 
-public void option4_clicked1(GOption source, GEvent event) { //_CODE_:option4:705268:
-  println("option4 - GOption >> GEvent." + event + " @ " + millis());
-} //_CODE_:option4:705268:
+public void manual_option_clicked(GOption source, GEvent event) { //_CODE_:manual_option:705268:
+  println("Modo manual selecionado.");
+  isAutomaticMode = false;
+  pid.setMode(0); // modo manual
+  plotLower.setLineColor(color(59,212,252));
+  manual_slider.setEnabled(true);
+  manual_slider.setAlpha(255);
+} //_CODE_:manual_option:705268:
 
 public void updateButton_click(GButton source, GEvent event) { //_CODE_:updateButton:434548:
+  println("Atualizado!");
   pid.setTunings( float(kpTextfield.getText()),
                   float(kiTextfield.getText()),
                   float(kdTextfield.getText()) );
 } //_CODE_:updateButton:434548:
+
+public void manual_slider_change(GCustomSlider source, GEvent event) { //_CODE_:manual_slider:284471:
+  println("custom_slider1 - GCustomSlider >> GEvent." + event + " @ " + millis());
+} //_CODE_:manual_slider:284471:
 
 
 
@@ -70,15 +84,19 @@ public void createGUI(){
   label8.setTextBold();
   label8.setOpaque(false);
   label9 = new GLabel(this, 20, 60, 80, 20);
+  label9.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   label9.setText("Setpoint");
   label9.setOpaque(false);
   label10 = new GLabel(this, 120, 60, 80, 20);
+  label10.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   label10.setText("Entrada");
   label10.setOpaque(false);
   label11 = new GLabel(this, 220, 60, 80, 20);
+  label11.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   label11.setText("Saída");
   label11.setOpaque(false);
   label12 = new GLabel(this, 320, 60, 80, 20);
+  label12.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   label12.setText("Erro");
   label12.setOpaque(false);
   label13 = new GLabel(this, 20, 180, 300, 20);
@@ -107,19 +125,19 @@ public void createGUI(){
   kdTextfield.setOpaque(true);
   kdTextfield.addEventHandler(this, "kdTextfield_change");
   togGroup1 = new GToggleGroup();
-  option3 = new GOption(this, 20, 310, 120, 20);
-  option3.setIconAlign(GAlign.LEFT, GAlign.MIDDLE);
-  option3.setText("Manual");
-  option3.setOpaque(false);
-  option3.addEventHandler(this, "option3_clicked1");
-  option4 = new GOption(this, 20, 330, 120, 20);
-  option4.setIconAlign(GAlign.LEFT, GAlign.MIDDLE);
-  option4.setText("Automático");
-  option4.setOpaque(false);
-  option4.addEventHandler(this, "option4_clicked1");
-  togGroup1.addControl(option3);
-  option3.setSelected(true);
-  togGroup1.addControl(option4);
+  auto_option = new GOption(this, 20, 310, 120, 20);
+  auto_option.setIconAlign(GAlign.LEFT, GAlign.MIDDLE);
+  auto_option.setText("Automático");
+  auto_option.setOpaque(false);
+  auto_option.addEventHandler(this, "auto_option_clicked");
+  manual_option = new GOption(this, 20, 330, 120, 20);
+  manual_option.setIconAlign(GAlign.LEFT, GAlign.MIDDLE);
+  manual_option.setText("Manual");
+  manual_option.setOpaque(false);
+  manual_option.addEventHandler(this, "manual_option_clicked");
+  togGroup1.addControl(auto_option);
+  auto_option.setSelected(true);
+  togGroup1.addControl(manual_option);
   label17 = new GLabel(this, 20, 290, 120, 20);
   label17.setText("Modo de Operação");
   label17.setTextBold();
@@ -146,6 +164,21 @@ public void createGUI(){
   errorLabel.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
   errorLabel.setText("errorLabel");
   errorLabel.setOpaque(false);
+  manual_slider = new GCustomSlider(this, 90, 410, 300, 70, "blue18px");
+  manual_slider.setShowValue(true);
+  manual_slider.setShowLimits(true);
+  manual_slider.setTextOrientation(G4P.ORIENT_LEFT);
+  manual_slider.setRotation(PI/2, GControlMode.CORNER);
+  manual_slider.setLimits(0, 255, 0);
+  manual_slider.setNbrTicks(255);
+  manual_slider.setNumberFormat(G4P.INTEGER, 0);
+  manual_slider.setOpaque(false);
+  manual_slider.addEventHandler(this, "manual_slider_change");
+  label1 = new GLabel(this, 20, 390, 70, 20);
+  label1.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+  label1.setText("SAÍDA");
+  label1.setTextBold();
+  label1.setOpaque(false);
 }
 
 // Variable declarations 
@@ -164,11 +197,13 @@ GTextField kpTextfield;
 GTextField kiTextfield; 
 GTextField kdTextfield; 
 GToggleGroup togGroup1; 
-GOption option3; 
-GOption option4; 
+GOption auto_option; 
+GOption manual_option; 
 GLabel label17; 
 GButton updateButton; 
 GLabel spLabel; 
 GLabel inputLabel; 
 GLabel outputLabel; 
 GLabel errorLabel; 
+GCustomSlider manual_slider; 
+GLabel label1; 

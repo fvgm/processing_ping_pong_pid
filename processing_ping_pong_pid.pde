@@ -6,7 +6,7 @@ import processing.serial.*;
 GPlot plotUpper, plotLower;
 PIDController pid;
 Serial serialPort;
-String comPort = "COM6";
+String comPort = "COM7";
 
 int input, output, setpoint;
 
@@ -16,6 +16,8 @@ int points = 1000; // number of points to display at a time
 int totalPoints = 1000; // number of points on x axis
 long previousMillis = 0;
 int duration = 20;
+
+boolean isAutomaticMode = true;
 
 public void setup(){
   size(1280, 760, JAVA2D);
@@ -79,8 +81,12 @@ public void draw(){
  
   } 
   
-  pid.compute();
-  output = (int)pid.getOutput();
+  if (isAutomaticMode == true) {
+    pid.compute();
+    output = (int)pid.getOutput();
+  } else {
+    output = manual_slider.getValueI();
+  }
 
   // get new value from serial port
   if ( millis() > previousMillis + duration) { // If data is available,
@@ -187,6 +193,9 @@ void keyPressed() {
 }
 
 void exit() {
+  println("saiu do programa...");
+  output = 0;
+  serialPort.write(0);
   serialPort.stop();
   super.exit();
 }
