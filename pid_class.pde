@@ -1,6 +1,7 @@
 class PIDController {
   
-  float myOutput;
+  float ci, co, error; //controllerInput, controllerOutput
+  
   float kp, ki, kd;
   int controllerDirection;
   long lastTime, sampleTime;
@@ -18,9 +19,9 @@ class PIDController {
   // CONSTRUCTOR
   PIDController(float kp, float ki, float kd, int direction) {
         
-        myOutput = output;
+        co = pwm;
         
-        setOutputLimits(0, 255);
+        setOutputLimits(0, 255);  // padrão
         
         sampleTime = 20; // tempo de amostragem padrão 0.1 sec
         
@@ -32,47 +33,46 @@ class PIDController {
         
   }
 
-  boolean compute() {
-    if(!inAuto) return false;
-    
-    long now = millis();
-    long timeChange = (now - lastTime);
-
+boolean compute() {
   
-    if(timeChange >= sampleTime) {  //Compute all the working error variables
-      
-      float error = setpoint - input;
-      float dInput = (input - lastInput);
-      
-      
-      iTerm+= (ki * error);
-      
-      if(iTerm > outMax) {
-        iTerm= outMax;
-      } else if(iTerm < outMin) {
-        iTerm= outMin;
-      }
-      
-     
-      
-      /*Compute PID Output*/
-      float output = kp * error + iTerm- kd * dInput;
-      
-      if(output > outMax) {
-        output = outMax;
-      } else if(output < outMin) {
-        output = outMin;
-      }
+  if (!inAuto) {
+    return false;
+  }
+  
+  long now = millis();
+  long timeChange = (now - lastTime);
+  
+  if(timeChange>=sampleTime) {
+    error = setpoint - pv;
+    iTerm += (ki * error);
     
-      myOutput = output;
+    if(iTerm > outMax) {
+      iTerm= outMax;
+    } else if(iTerm < outMin) {
+      iTerm= outMin;
+    }
     
+    float dInput = (pv - lastInput);
+    co = kp * error + iTerm - kd * dInput;
+    
+    if(co > outMax) co = outMax;
+      else if(co < outMin) co = outMin;
+    
+      
       /*Remember some variables for next time*/
-      lastInput = input;
-      lastTime = now;
+      lastInput = pv;
+      lastTime = now; 
+      
       return true;
-   }
-   else return false;
+    
+  } else {
+    return false;
+  }
+  
 }
+
+
+
   
   void setOutputLimits(float min, float max) {
     if (min >= max) return;
@@ -80,10 +80,10 @@ class PIDController {
     outMax = max;
     
     if(inAuto) {
-      if (myOutput > outMax) {
-        myOutput = outMax;
-      } else if (myOutput < outMin) {
-        myOutput = outMin;
+      if (co > outMax) {
+        co = outMax;
+      } else if (co < outMin) {
+        co = outMin;
       }
       
       if (iTerm > outMax) {
@@ -105,9 +105,7 @@ class PIDController {
 
   void setTunings(float Kp, float Ki, float Kd) {
      if (Kp<0 || Ki<0 || Kd<0) return;
-   
-     //dispKp = Kp; dispKi = Ki; dispKd = Kd;
-     
+
      float SampleTimeInSec = ((float)sampleTime)/1000;  
      kp = Kp;
      ki = Ki * SampleTimeInSec;
@@ -140,8 +138,8 @@ class PIDController {
   }
   
   void initialize() {
-     iTerm = myOutput;
-     lastInput = input;
+     iTerm = co;
+     lastInput = pv;
      if(iTerm > outMax) {
        iTerm = outMax;
      } else if(iTerm < outMin) {
@@ -162,8 +160,8 @@ class PIDController {
   }
   
   
-  float getOutput() {
-    return myOutput;
+  float getCO() {
+    return co;
   }
   
 }

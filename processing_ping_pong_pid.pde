@@ -8,7 +8,7 @@ PIDController pid;
 Serial serialPort;
 String comPort = "COM7";
 
-int input, output, setpoint;
+int pv, pwm, setpoint;
 
 // initialise plot variables
 int i = 0; // variable that changes for point calculation
@@ -20,7 +20,7 @@ int duration = 20;
 boolean isAutomaticMode = true;
 
 public void setup(){
-  size(1280, 760, JAVA2D);
+  size(1270, 760, JAVA2D);
   
   serialPort = new Serial(this,comPort,9600); 
   serialPort.clear();
@@ -83,9 +83,9 @@ public void draw(){
   
   if (isAutomaticMode == true) {
     pid.compute();
-    output = (int)pid.getOutput();
+    pwm = (int)pid.getCO();
   } else {
-    output = manual_slider.getValueI();
+    pwm = manual_slider.getValueI();
   }
 
   // get new value from serial port
@@ -94,15 +94,15 @@ public void draw(){
     // Add the point at the end of the array
     i++;
     
-    plotUpper.addPoint(i,input);
+    plotUpper.addPoint(i,pv);
     plotUpper.getLayer("setpointLayer").addPoint(i,setpoint);
    
-    plotLower.addPoint(i, output);
+    plotLower.addPoint(i, pwm);
     
     spLabel.setText(setpointSlider.getValueS());
-    inputLabel.setText(str(input)); // str() converte em String
-    outputLabel.setText(str(output));
-    errorLabel.setText(str(setpoint-input));
+    inputLabel.setText(str(pv)); // str() converte em String
+    outputLabel.setText(str(pwm));
+    errorLabel.setText(str(setpoint-pv));
     
     previousMillis = previousMillis + duration;
   }
@@ -117,10 +117,10 @@ public void customGUI(){
   kdTextfield.setText(str(pid.getKd()));
   
     // Place your setup code here
-  GPointsArray pointsArray = new GPointsArray(points);
-  GPointsArray points2 = new GPointsArray(points);
+  GPointsArray pvArray = new GPointsArray(points);
+  GPointsArray spArray = new GPointsArray(points);
   
-  GPointsArray pointsOutput = new GPointsArray(points);
+  GPointsArray coArray = new GPointsArray(points);
   
   // Cria o gráfico superior
   plotUpper = new GPlot(this);
@@ -138,8 +138,8 @@ public void customGUI(){
   //plotUpper.getYAxis().setAxisLabelText("Distancia (mm)"); // set y axis label
   
   // Add the set of points to the plot 
-  plotUpper.setPoints(pointsArray);
-  plotUpper.addLayer("setpointLayer",points2);
+  plotUpper.setPoints(pvArray);
+  plotUpper.addLayer("setpointLayer",spArray);
   
   // configura a layer padrao
   plotUpper.setLineWidth(2);
@@ -163,7 +163,7 @@ public void customGUI(){
   plotLower.getXAxis().setAxisLabelText("Amostras (1 s/div)"); // set x axis label
   
   // Add the set of points to the plot 
-  plotLower.setPoints(pointsOutput);
+  plotLower.setPoints(coArray);
   
   // troca a cor da layer
   plotLower.setBoxBgColor(255); // 0 - preto, 255  - branco
@@ -172,8 +172,8 @@ public void customGUI(){
 }
 
 void serialEvent(Serial serialPort) {
-  input = serialPort.read();
-  serialPort.write(output);
+  pv = serialPort.read();
+  serialPort.write(pwm);
 }
 
 void keyPressed() {
@@ -194,7 +194,7 @@ void keyPressed() {
 
 void exit() {
   println("saiu do programa...");
-  output = 0;
+  pwm = 0;
   serialPort.write(0);
   serialPort.stop();
   super.exit();
