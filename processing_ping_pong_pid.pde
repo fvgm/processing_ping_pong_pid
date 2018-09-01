@@ -9,6 +9,7 @@ Serial serialPort;
 String comPort = "COM7";
 
 int pv, pwm, setpoint;
+int outputMinimum = 80;
 
 // initialise plot variables
 int i = 0; // variable that changes for point calculation
@@ -16,17 +17,19 @@ int points = 1000; // number of points to display at a time
 int totalPoints = 1000; // number of points on x axis
 long previousMillis = 0;
 int duration = 20;
+boolean isPaused = false;
 
 boolean isAutomaticMode = true;
 
 public void setup(){
   size(1270, 760, JAVA2D);
   
+  
   serialPort = new Serial(this,comPort,9600); 
   serialPort.clear();
   
   pid = new PIDController(1,0,0,0);
-  pid.setOutputLimits(80,255);
+  pid.setOutputLimits(outputMinimum,255);
   pid.setMode(1);
   
   createGUI();
@@ -88,10 +91,7 @@ public void draw(){
     pwm = manual_slider.getValueI();
   }
 
-  // get new value from serial port
-  if ( millis() > previousMillis + duration) { // If data is available,
-    // get new valeu
-    // Add the point at the end of the array
+  if ( (millis() > previousMillis + duration) && !isPaused) {  // adiciona novos pontos no gráfico, se não estiver pausado
     i++;
     
     plotUpper.addPoint(i,pv);
@@ -108,13 +108,16 @@ public void draw(){
   }
 }
 
-// Use this method to add additional statements
-// to customise the GUI controls
+
+// customiza a GUI
 public void customGUI(){
   
   kpTextfield.setText(str(pid.getKp()));
   kiTextfield.setText(str(pid.getKi()));
   kdTextfield.setText(str(pid.getKd()));
+  
+  manual_slider.setLimits(255, outputMinimum); // corrige a escala do slider para eliminar a banda morta
+  hTextfield.setText("10");
   
     // Place your setup code here
   GPointsArray pvArray = new GPointsArray(points);
@@ -178,17 +181,26 @@ void serialEvent(Serial serialPort) {
 
 void keyPressed() {
   switch(key) {
-    case 'a':
-      setpoint = setpointSlider.getValueI() + 20;
-      break;
-    case 'b':
-      println("B pressionado");
-      setpoint = setpointSlider.getValueI() - 20;
-      break;
-    case 'z':
-      println("z pressionado");
-      setpoint = setpointSlider.getValueI();
+    case 'p':
+      pause_graph();
+    break;
+    case 'w':
+      manual_slider.setValue( manual_slider.getValueI() + int(hTextfield.getText()));
+    break;
+    case 'q':
+      manual_slider.setValue( manual_slider.getValueI() - int(hTextfield.getText()));
+    break;
   }
+  
+  if(key==CODED) { // para detectar teclas especiais - incrementa e decrementa o PWM manual
+    if ( (keyCode == UP) && !isAutomaticMode) {
+      manual_slider.setValue( manual_slider.getValueF()+1);
+    }
+    if ( (keyCode == DOWN) && !isAutomaticMode) {
+      manual_slider.setValue( manual_slider.getValueF()-1);
+    }
+  }
+    
       
 }
 
@@ -198,4 +210,12 @@ void exit() {
   serialPort.write(0);
   serialPort.stop();
   super.exit();
+}
+
+void pause_graph() {
+  if (!isPaused) {
+    isPaused = true;
+  } else {
+    isPaused = false;
+  }  
 }
