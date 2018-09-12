@@ -211,6 +211,10 @@ public void createGUI(){
   relayDownButton.setText("(Q) - h/2");
   relayDownButton.setTextBold();
   relayDownButton.addEventHandler(this, "relayDownButton_click");
+  label2 = new GLabel(this, 20, 730, 370, 20);
+  label2.setText("Prof. Fernando Magro - CONTROLE - Engenharia Elétrica");
+  label2.setTextBold();
+  label2.setOpaque(false);
 }
 
 // Variable declarations 
@@ -244,3 +248,4 @@ GLabel h_label;
 GTextField hTextfield; 
 GButton relayUpButton; 
 GButton relayDownButton; 
+GLabel label2; 

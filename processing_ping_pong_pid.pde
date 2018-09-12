@@ -1,4 +1,4 @@
-// Need G4P library
+// carrega as bibliotecas
 import g4p_controls.*;
 import grafica.*;
 import processing.serial.*;
@@ -6,18 +6,18 @@ import processing.serial.*;
 GPlot plotUpper, plotLower;
 PIDController pid;
 Serial serialPort;
-String comPort = "COM7";
+String comPort = "COM6";   // porta serial do Arduino
 
 int pv, pwm, setpoint;
-int outputMinimum = 80;
+int outputMinimum = 80;    // banda morta do motor. Valor mínimo para bola subir
 
-// initialise plot variables
-int i = 0; // variable that changes for point calculation
-int points = 1000; // number of points to display at a time
-int totalPoints = 1000; // number of points on x axis
+// inicialização das variáveis de plotagem
+int i = 0;              // contador
+int points = 1000;      // numero de pontos a exibir
+int totalPoints = 1000; // numero de pontos no eixo x
 long previousMillis = 0;
 int duration = 20;
-boolean isPaused = false;
+boolean isPaused = false;  // flag para implementação do PAUSE
 
 boolean isAutomaticMode = true;
 
@@ -44,7 +44,7 @@ public void draw(){
   rect(10,25,380,340); // decoração da janela
   rect(10,380,380,340);
   
-  //draw the plot
+  //desenha o gráfico superior
   plotUpper.beginDraw();
   plotUpper.drawBackground();
   plotUpper.drawBox();
@@ -57,7 +57,7 @@ public void draw(){
   plotUpper.drawGridLines(GPlot.HORIZONTAL);
   plotUpper.endDraw();
   
-    //draw the plot2
+    //desenha o gráfico inferior
   plotLower.beginDraw();
   plotLower.drawBackground();
   plotLower.drawBox();
@@ -70,10 +70,10 @@ public void draw(){
   plotLower.drawGridLines(GPlot.HORIZONTAL);
   plotUpper.endDraw();
   
-  // check if i has exceeded the plot size
+  // verifica se a área de plotagem já está cheia
   if (i > totalPoints){
     
-    i=0; // reset to zero if it has
+    i=0; // reseta para zero se estiver cheia
     
     plotUpper.setPoints(new GPointsArray(points));
     plotUpper.getLayer("setpointLayer").setPoints(new GPointsArray(points));
@@ -84,11 +84,11 @@ public void draw(){
  
   } 
   
-  if (isAutomaticMode == true) {
+  if (isAutomaticMode == true) {  // verifica se está no modo automático
     pid.compute();
     pwm = (int)pid.getCO();
   } else {
-    pwm = manual_slider.getValueI();
+    pwm = manual_slider.getValueI();   // se estiver no manual, recebe o valor do slider
   }
 
   if ( (millis() > previousMillis + duration) && !isPaused) {  // adiciona novos pontos no gráfico, se não estiver pausado
@@ -119,7 +119,7 @@ public void customGUI(){
   manual_slider.setLimits(255, outputMinimum); // corrige a escala do slider para eliminar a banda morta
   hTextfield.setText("10");
   
-    // Place your setup code here
+    // inicializar o array dos pontos dos gráficos
   GPointsArray pvArray = new GPointsArray(points);
   GPointsArray spArray = new GPointsArray(points);
   
@@ -127,20 +127,19 @@ public void customGUI(){
   
   // Cria o gráfico superior
   plotUpper = new GPlot(this);
-  plotUpper.setPos(420, 0); // set the position of to left corner of plot
-  plotUpper.setDim(750, 300); // set plot size
+  plotUpper.setPos(420, 0); // posição do ponto superior esquerdo do gráfico
+  plotUpper.setDim(750, 300); // tamanho do gráfico
+  plotUpper.getXAxis().setNTicks(20);  // divisões da grade
   
-  plotUpper.getXAxis().setNTicks(20);
+  // colo os limites no gráfico
+  plotUpper.setXLim(0, totalPoints); // limite em X
+  plotUpper.setYLim(0, 100); // limite em Y
   
-  // Set the plot limits (this will fix them)
-  plotUpper.setXLim(0, totalPoints); // set x limits
-  plotUpper.setYLim(0, 100); // set y limits
-  
-  // Set the plot title and the axis labels
+  // Coloca o título no gráfico e os rótulos nos eixos
   plotUpper.setTitleText("Distância vs. Tempo"); // set plot title
   //plotUpper.getYAxis().setAxisLabelText("Distancia (mm)"); // set y axis label
   
-  // Add the set of points to the plot 
+  // Adiciona os pontos vazios no gráfico
   plotUpper.setPoints(pvArray);
   plotUpper.addLayer("setpointLayer",spArray);
   
@@ -154,18 +153,16 @@ public void customGUI(){
 
 // Cria o gráfico inferior
   plotLower = new GPlot(this);
-  plotLower.setPos(420, 350); // set the position of to left corner of plot
-  plotLower.setDim(750, 300); // set plot size
+  plotLower.setPos(420, 350); 
+  plotLower.setDim(750, 300); 
 
   plotLower.getXAxis().setNTicks(20);
   
-  // Set the plot limits (this will fix them)
-  plotLower.setXLim(0, totalPoints); // set x limits
-  plotLower.setYLim(0, 255); // set y limits
+   plotLower.setXLim(0, totalPoints); 
+  plotLower.setYLim(0, 255); 
   
-  plotLower.getXAxis().setAxisLabelText("Amostras (1 s/div)"); // set x axis label
+  plotLower.getXAxis().setAxisLabelText("Amostras (1 s/div)"); 
   
-  // Add the set of points to the plot 
   plotLower.setPoints(coArray);
   
   // troca a cor da layer
@@ -174,12 +171,12 @@ public void customGUI(){
  
 }
 
-void serialEvent(Serial serialPort) {
+void serialEvent(Serial serialPort) {   // evento executado ao receber dado serial
   pv = serialPort.read();
   serialPort.write(pwm);
 }
 
-void keyPressed() {
+void keyPressed() {     // captura os eventos to teclado
   switch(key) {
     case 'p':
       pause_graph();
@@ -204,7 +201,7 @@ void keyPressed() {
       
 }
 
-void exit() {
+void exit() {   // essa função é chamada ao fechar o programa; garante o desligamento do motor
   println("saiu do programa...");
   pwm = 0;
   serialPort.write(0);
